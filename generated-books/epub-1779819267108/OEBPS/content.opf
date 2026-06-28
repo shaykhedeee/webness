@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="3.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="BookId">urn:uuid:8ddabc81-b0eb-4693-958e-12493555403f</dc:identifier>
+    <dc:title>Aquascaping &amp; Aquatic Tank Design: The Complete Guide: A Comprehensive Guide for Aquarium hobbyists, aquascapers, zen design lovers</dc:title>
+    <dc:creator>Webness Zen Lab</dc:creator>
+    <dc:language>en</dc:language>
+    <dc:publisher>Webness Publishing</dc:publisher>
+    <dc:description>Aquascaping &amp; Aquatic Tank Design: The Complete Guide is a comprehensive guide for Aquarium hobbyists, aquascapers, zen design lovers covering everything about Aquascaping &amp; Aquatic Tank Design.</dc:description>
+    <dc:date>2026-05-26</dc:date>
+    <dc:rights>Copyright &copy; 2026 Webness Zen Lab. All rights reserved.</dc:rights>
+    <dc:subject>aquascaping guide</dc:subject>
+    <dc:subject>iwagumi layout</dc:subject>
+    <dc:subject>aquatic plants care</dc:subject>
+    <dc:subject>co2 tank diffuser</dc:subject>
+    <dc:subject>driftwood design</dc:subject>
+    <meta name="cover" content="cover-image"/>
+    <meta property="dcterms:modified">2026-05-26T18:14:27Z</meta>
+  </metadata>
+  <manifest>
+    <item id="style" href="style.css" media-type="text/css"/>
+    <item id="cover-image" href="images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>
+    <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
+    <item id="title" href="title.xhtml" media-type="application/xhtml+xml"/>
+    <item id="copyright" href="copyright.xhtml" media-type="application/xhtml+xml"/>
+    <item id="dedication" href="dedication.xhtml" media-type="application/xhtml+xml"/>
+    <item id="preface" href="preface.xhtml" media-type="application/xhtml+xml"/>
+    <item id="img-ch1" href="images/chapter-1.svg" media-type="image/svg+xml"/>
+    <item id="ch1" href="chapter-1.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch2" href="images/chapter-2.svg" media-type="image/svg+xml"/>
+    <item id="ch2" href="chapter-2.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch3" href="images/chapter-3.svg" media-type="image/svg+xml"/>
+    <item id="ch3" href="chapter-3.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch4" href="images/chapter-4.svg" media-type="image/svg+xml"/>
+    <item id="ch4" href="chapter-4.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch5" href="images/chapter-5.svg" media-type="image/svg+xml"/>
+    <item id="ch5" href="chapter-5.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="about-author" href="about-author.xhtml" media-type="application/xhtml+xml"/>
+    <item id="resources" href="resources.xhtml" media-type="application/xhtml+xml"/>
+    <item id="cta" href="cta.xhtml" media-type="application/xhtml+xml"/>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="cover"/>
+    <itemref idref="title"/>
+    <itemref idref="copyright"/>
+    <itemref idref="dedication"/>
+    <itemref idref="preface"/>
+    <itemref idref="ch1"/>
+    <itemref idref="ch2"/>
+    <itemref idref="ch3"/>
+    <itemref idref="ch4"/>
+    <itemref idref="ch5"/>
+    <itemref idref="about-author"/>
+    <itemref idref="resources"/>
+    <itemref idref="cta"/>
+  </spine>
+</package>

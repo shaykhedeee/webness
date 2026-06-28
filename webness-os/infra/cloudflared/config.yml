@@ -1,0 +1,22 @@
+# Cloudflare Tunnel Configuration
+# Runs on the local AI PC and exposes brain.webness.in to the Brain API.
+#
+# First-time tunnel setup:
+#   cloudflared tunnel login
+#   cloudflared tunnel create webness-brain
+#   cloudflared tunnel route dns webness-brain brain.webness.in
+#
+# Then replace YOUR_TUNNEL_ID and USER below.
+
+tunnel: YOUR_TUNNEL_ID
+credentials-file: C:\Users\USER\.cloudflared\YOUR_TUNNEL_ID.json
+
+ingress:
+  - hostname: brain.webness.in
+    service: http://127.0.0.1:8000
+    originRequest:
+      connectTimeout: 30s
+      keepAliveTimeout: 120s
+      keepAliveConnections: 10
+
+  - service: http_status:404

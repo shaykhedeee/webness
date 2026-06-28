@@ -1,0 +1,44 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="600" height="400" fill="#f8fafc"/>
+  
+  <!-- Dragon Stone Cluster -->
+  <g transform="translate(300, 250)">
+    <rect x="-40" y="-30" width="80" height="60" rx="10" fill="#6366f1"/>
+    <rect x="-20" y="-50" width="40" height="40" rx="8" fill="#a855f7"/>
+    <rect x="-60" y="-10" width="30" height="20" rx="5" fill="#6366f1"/>
+    <rect x="30" y="-10" width="30" height="20" rx="5" fill="#a855f7"/>
+  </g>
+  
+  <!-- Driftwood Silhouette -->
+  <path d="M100 300 C150 250, 200 280, 250 230 C300 180, 350 200, 400 150" stroke="#1a1a1a" stroke-width="8" fill="none"/>
+  
+  <!-- Carpeting Grass Layers -->
+  <g transform="translate(100, 300)">
+    <polygon points="0,0 20,0 10,-40" fill="#22c55e"/>
+    <polygon points="30,0 50,0 40,-35" fill="#22c55e"/>
+    <polygon points="60,0 80,0 70,-45" fill="#22c55e"/>
+  </g>
+  
+  <!-- Aquatic Moss Patches -->
+  <g transform="translate(400, 280)">
+    <circle cx="0" cy="0" r="6" fill="#f59e0b"/>
+    <circle cx="10" cy="-5" r="5" fill="#f59e0b"/>
+    <circle cx="5" cy="8" r="4" fill="#f59e0b"/>
+  </g>
+  
+  <!-- CO2 Bubble Diffuser -->
+  <g transform="translate(300, 350)">
+    <circle cx="0" cy="0" r="3" fill="#e2e8f0"/>
+    <circle cx="-5" cy="-10" r="2" fill="#e2e8f0"/>
+    <circle cx="5" cy="-15" r="2" fill="#e2e8f0"/>
+    <circle cx="-3" cy="-20" r="1.5" fill="#e2e8f0"/>
+  </g>
+  
+  <!-- Neon Tetra Fish -->
+  <g transform="translate(200, 150)">
+    <path d="M0 0 L10 -5 L20 0 L10 5 Z" fill="#6366f1"/>
+    <path d="M30 10 L40 5 L50 10 L40 15 Z" fill="#a855f7"/>
+    <path d="M60 -10 L70 -15 L80 -10 L70 -5 Z" fill="#22c55e"/>
+  </g>
+</svg>

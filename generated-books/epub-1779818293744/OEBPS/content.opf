@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="3.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="BookId">urn:uuid:67686f5b-b781-4f81-aa56-84340bbe0440</dc:identifier>
+    <dc:title>Rooted Understanding: The Ultimate Guide to Potted Plants, Interior Styling, and Thriving Botanicals</dc:title>
+    <dc:creator>Webness Botanical Lab</dc:creator>
+    <dc:language>en</dc:language>
+    <dc:publisher>Webness Publishing</dc:publisher>
+    <dc:description>Rooted Understanding is a comprehensive guide for Urban gardeners, plant lovers, home interior enthusiasts covering everything about Houseplants Care &amp; Indoor Jungle Design.</dc:description>
+    <dc:date>2026-05-26</dc:date>
+    <dc:rights>Copyright &copy; 2026 Webness Botanical Lab. All rights reserved.</dc:rights>
+    <dc:subject>plant physiology</dc:subject>
+    <dc:subject>houseplant myths</dc:subject>
+    <dc:subject>home microclimate</dc:subject>
+    <dc:subject>evidence-based practices</dc:subject>
+    <meta property="dcterms:modified">2026-05-26T17:58:13Z</meta>
+  </metadata>
+  <manifest>
+    <item id="style" href="style.css" media-type="text/css"/>
+    <item id="title" href="title.xhtml" media-type="application/xhtml+xml"/>
+    <item id="copyright" href="copyright.xhtml" media-type="application/xhtml+xml"/>
+    <item id="dedication" href="dedication.xhtml" media-type="application/xhtml+xml"/>
+    <item id="preface" href="preface.xhtml" media-type="application/xhtml+xml"/>
+    <item id="img-ch1" href="images/chapter-1.svg" media-type="image/svg+xml"/>
+    <item id="ch1" href="chapter-1.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch1" href="images/chapter-1.svg" media-type="image/svg+xml"/>
+    <item id="ch1" href="chapter-1.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch2" href="images/chapter-2.svg" media-type="image/svg+xml"/>
+    <item id="ch2" href="chapter-2.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch3" href="images/chapter-3.svg" media-type="image/svg+xml"/>
+    <item id="ch3" href="chapter-3.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="img-ch4" href="images/chapter-4.svg" media-type="image/svg+xml"/>
+    <item id="ch4" href="chapter-4.xhtml" media-type="application/xhtml+xml" properties="svg"/>
+    <item id="about-author" href="about-author.xhtml" media-type="application/xhtml+xml"/>
+    <item id="resources" href="resources.xhtml" media-type="application/xhtml+xml"/>
+    <item id="cta" href="cta.xhtml" media-type="application/xhtml+xml"/>
+    <item id="glossary" href="glossary.xhtml" media-type="application/xhtml+xml"/>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="title"/>
+    <itemref idref="copyright"/>
+    <itemref idref="dedication"/>
+    <itemref idref="preface"/>
+    <itemref idref="ch1"/>
+    <itemref idref="ch1"/>
+    <itemref idref="ch2"/>
+    <itemref idref="ch3"/>
+    <itemref idref="ch4"/>
+    <itemref idref="about-author"/>
+    <itemref idref="resources"/>
+    <itemref idref="cta"/>
+    <itemref idref="glossary"/>
+  </spine>
+</package>

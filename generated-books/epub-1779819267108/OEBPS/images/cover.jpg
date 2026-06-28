@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+    <rect width="100%" height="100%" fill="#18181b"/>
+    <circle cx="200" cy="300" r="100" fill="#6366f1" opacity="0.1"/>
+    <text x="200" y="280" font-family="Georgia" font-size="28" fill="#e5e7eb" text-anchor="middle">NICHE EBOOK</text>
+    <text x="200" y="320" font-family="Georgia" font-size="14" fill="#71717a" text-anchor="middle" font-style="italic">Webness Publishing</text>
+  </svg>

@@ -1,0 +1,76 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+packages/db/prisma/*.db
+packages/db/prisma/migrations/**/migration_lock.toml
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+.Python
+*.egg-info/
+.eggs/
+
+# ComfyUI
+tools/graphic_designer/models/
+tools/graphic_designer/output/
+
+# Local AI/model artifacts
+*.gguf
+*.safetensors
+*.onnx
+*.pt
+*.pth
+*.ckpt
+models/
+model-cache/
+ollama/
+
+# Local deployment/state
+.vercel/
+.wrangler/
+.cloudflared/
+tmp/
+temp/
+apps/web/.data/
+
+# Test
+coverage/
+.nyc_output/
+
+# Misc
+*.tgz
+.turbo/

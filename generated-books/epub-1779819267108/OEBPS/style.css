@@ -1,0 +1,343 @@
+@charset "UTF-8";
+
+/* ═══════════════════════════════════════════
+   Webness Publishing — KDP-Compliant Styles
+   Amazon Kindle Reflowable Ebook Standards
+   ═══════════════════════════════════════════ */
+
+/* Cover Page */
+.cover-page-full {
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+.cover-page-full img {
+  max-width: 100%;
+  height: auto;
+  max-height: 100vh;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Base Typography */
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.7;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 1em;
+  text-rendering: optimizeLegibility;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+/* ─── Headings ─── */
+h1, h2, h3, h4 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #1a202c;
+  page-break-after: avoid;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2em;
+  margin-top: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.5em;
+  color: #2d3748;
+  margin-top: 1.8em;
+  padding-bottom: 0.2em;
+  border-bottom: 1px solid #edf2f7;
+}
+
+h3 {
+  font-size: 1.2em;
+  color: #4a5568;
+  margin-top: 1.4em;
+}
+
+h4 {
+  font-size: 1.05em;
+  color: #718096;
+  margin-top: 1.2em;
+}
+
+/* ─── KDP Paragraph Formatting ─── */
+p {
+  margin-bottom: 0;
+  margin-top: 0;
+  text-indent: 1.5em;  /* KDP first-line indent (0.3-0.5") */
+  text-align: justify;
+  font-size: 1em;
+  orphans: 2;
+  widows: 2;
+}
+
+/* First paragraph after heading — no indent per KDP convention */
+h1 + p, h2 + p, h3 + p, h4 + p,
+blockquote + p, .chapter-illustration + p,
+hr + p, ul + p, ol + p, pre + p {
+  text-indent: 0;
+}
+
+/* ─── Lists ─── */
+ul, ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+li {
+  margin-bottom: 0.4em;
+  text-indent: 0;
+}
+
+/* ─── Blockquotes (Callout Boxes) ─── */
+blockquote {
+  border-left: 4px solid #6366f1;
+  padding: 0.8em 1em;
+  margin: 1.5em 0;
+  color: #4a5568;
+  background-color: #f8f9fa;
+  font-style: italic;
+  page-break-inside: avoid;
+}
+
+blockquote p {
+  text-indent: 0;
+  margin: 0.3em 0;
+}
+
+/* ─── Code ─── */
+pre {
+  background-color: #f7fafc;
+  border-left: 4px solid #a855f7;
+  padding: 1em;
+  overflow-x: auto;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85em;
+  line-height: 1.5;
+  margin: 1.5em 0;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: "Courier New", Courier, monospace;
+  background-color: #edf2f7;
+  padding: 0.15em 0.35em;
+  font-size: 0.9em;
+}
+
+/* ─── Section Breaks ─── */
+hr, hr.section-break {
+  border: none;
+  text-align: center;
+  margin: 2em 0;
+  page-break-after: avoid;
+}
+
+hr::after, hr.section-break::after {
+  content: "* * *";
+  color: #a0aec0;
+  font-size: 1.2em;
+  letter-spacing: 0.5em;
+}
+
+/* ─── Images & Illustrations ─── */
+.chapter-illustration {
+  text-align: center;
+  margin: 1.5em 0;
+  page-break-inside: avoid;
+}
+
+.chapter-illustration img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── Key Takeaways Box ─── */
+.key-takeaways {
+  border: 2px solid #6366f1;
+  border-radius: 6px;
+  padding: 1em 1.5em;
+  margin: 2em 0;
+  background-color: #f0f0ff;
+  page-break-inside: avoid;
+}
+
+.key-takeaways h3 {
+  font-size: 1em;
+  color: #6366f1;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+.key-takeaways li {
+  font-size: 0.95em;
+}
+
+/* ─── Title Page ─── */
+.title-page {
+  text-align: center;
+  padding-top: 30%;
+}
+
+.book-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #1a202c;
+  margin-bottom: 0.3em;
+  border: none;
+}
+
+.book-subtitle {
+  font-size: 1.3em;
+  color: #4a5568;
+  font-style: italic;
+  margin-bottom: 2em;
+}
+
+.book-author {
+  font-size: 1.2em;
+  color: #2d3748;
+  margin-bottom: 0.5em;
+}
+
+.book-publisher {
+  font-size: 0.9em;
+  color: #a0aec0;
+  margin-top: 3em;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* ─── Copyright Page ─── */
+.copyright-page {
+  padding-top: 30%;
+  font-size: 0.85em;
+  color: #718096;
+}
+
+.copyright-page p {
+  text-indent: 0;
+  text-align: center;
+  margin-bottom: 0.8em;
+}
+
+.disclaimer {
+  font-style: italic;
+  font-size: 0.9em;
+  margin-top: 2em;
+}
+
+/* ─── Dedication ─── */
+.dedication-page {
+  text-align: center;
+  padding-top: 35%;
+  font-style: italic;
+  color: #4a5568;
+}
+
+/* ─── CTA Page ─── */
+.cta-page {
+  border: 2px solid #a855f7;
+  border-radius: 8px;
+  padding: 1.5em;
+  margin: 2em 0;
+  background-color: #faf5ff;
+  page-break-inside: avoid;
+}
+
+.cta-page h1, .cta-page h2 {
+  color: #6b21a8;
+  border: none;
+  text-align: left;
+}
+
+/* ─── Links ─── */
+a {
+  color: #6366f1;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ─── Case Study Boxes ─── */
+.case-study {
+  border: 2px solid #22c55e;
+  border-radius: 6px;
+  padding: 1.2em 1.5em;
+  margin: 2em 0;
+  background-color: #f0fdf4;
+  page-break-inside: avoid;
+}
+.case-study h3 {
+  font-size: 1.05em;
+  color: #15803d;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+.case-study p {
+  text-indent: 0;
+  margin: 0.4em 0;
+}
+
+/* ─── Did You Know? Callouts ─── */
+.did-you-know {
+  border: 2px dashed #f59e0b;
+  border-radius: 6px;
+  padding: 1.2em 1.5em;
+  margin: 2em 0;
+  background-color: #fffbeb;
+  page-break-inside: avoid;
+}
+.did-you-know h3 {
+  font-size: 1.05em;
+  color: #b45309;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+.did-you-know p {
+  text-indent: 0;
+  margin: 0.4em 0;
+}
+
+/* ─── Comparative Data Tables ─── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+  page-break-inside: avoid;
+}
+th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: bold;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid #cbd5e1;
+}
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+}
+tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+/* ─── Print Overrides ─── */
+@media print {
+  body { font-size: 11pt; }
+  .title-page { page-break-after: always; }
+  h1 { page-break-before: always; }
+  .key-takeaways, .cta-page, blockquote, .case-study, .did-you-know, table { page-break-inside: avoid; }
+}

@@ -1,0 +1,779 @@
+// ============================================
+// WEBNESS OS — Database Schema
+// PostgreSQL 16 + pgvector
+// ============================================
+// Run: pnpm db:generate && pnpm db:migrate
+// Enable pgvector: CREATE EXTENSION vector;
+// ============================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+// ==================== ORGANIZATIONS & USERS ====================
+
+model Organization {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+  plan          Plan      @default(FREE)
+  industry      String?   // "interior_design", "clinic", "restaurant", etc.
+  brandVoice    Json?     // Stored brand voice profile
+  onboarding    Json?     // Onboarding answers (favorite shape, goals, etc.)
+  website       String?   // Client's website URL
+  domain        String?   // Custom domain (e.g., client.webness.in)
+  logoUrl       String?   // Logo stored in R2
+  byokKeys      Json?     // Encrypted API keys: { groq, openai, gemini, openrouter }
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  users              User[]
+  creditWallet       CreditWallet?
+  tasks              Task[]
+  assets             Asset[]
+  embeddings         Embedding[]
+  healthScores       ClientHealthScore[]
+  whatsappAccounts   WhatsAppAccount[]
+  whatsappMessages   WhatsAppMessage[]
+  invoices           Invoice[]
+  expenses           Expense[]
+  socialAccounts     SocialAccount[]
+  apiKeys            ApiKey[]
+  clientRooms        ClientRoom[]
+  signals            Signal[]
+  clientReports      ClientReport[]
+  actionItems        ActionItem[]
+  sceneBranches      SceneBranch[]
+  proposals          Proposal[]
+  drawings           Drawing[]
+  renders            Render[]
+  ingestions         Ingestion[]
+  hermesLogs         HermesLog[]
+}
+
+enum Plan {
+  FREE        // Freemium demo: limited tools, 50 credits/mo
+  STARTER     // $49/mo: 500 credits, basic tools
+  PRO         // $149/mo: 2000 credits, all tools
+  ENTERPRISE  // $399/mo: 10000 credits, white-label, API
+  SAASS       // Custom: outcome-based pricing, managed service
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?   // Null if OAuth login
+  name          String
+  avatar        String?
+  role          UserRole  @default(CLIENT_USER)
+  orgId         String
+  favoriteShape String?   // The fun onboarding question!
+  lastActiveAt  DateTime?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  org           Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tasks         Task[]
+  creditTxns    CreditTransaction[]
+  sessions      Session[]
+  auditLogs     AuditLog[]
+}
+
+enum UserRole {
+  SUPER_ADMIN    // Webness owner — God mode
+  AGENCY_ADMIN   // Future: agency partners who resell
+  CLIENT_ADMIN   // Client's admin (manages their org)
+  CLIENT_USER    // Client team member (uses tools)
+  CLIENT_VIEWER  // Read-only access
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+// ==================== CREDITS & BILLING ====================
+
+model CreditWallet {
+  id        String   @id @default(uuid())
+  orgId     String   @unique
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  org          Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  transactions CreditTransaction[]
+}
+
+model CreditTransaction {
+  id        String       @id @default(uuid())
+  walletId  String
+  userId    String?      // Who triggered (null for system/admin actions)
+  amount    Int          // Positive = purchase/bonus, Negative = usage
+  type      CreditTxType
+  balance   Int          // Running balance after transaction
+  taskId    String?      // If usage, which task consumed it
+  description String?    // Human-readable note
+  metadata  Json?        // Payment ID, promo code, admin note, etc.
+  createdAt DateTime     @default(now())
+
+  wallet    CreditWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  task      Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([walletId, createdAt])
+}
+
+enum CreditTxType {
+  PURCHASE      // Stripe/Razorpay payment
+  USAGE         // Tool execution cost
+  BONUS         // Admin-granted promotional credits
+  REFUND        // Failed task refund
+  SUBSCRIPTION  // Monthly plan credit allocation
+  MANUAL        // Admin manual adjustment
+  ADMIN_GRANT   // Admin credited bonus
+  ADMIN_DEDUCT  // Admin deducted credits
+  WELCOME_BONUS // Sign-up welcome credits
+}
+
+// ==================== TOOLS & AGENTS ====================
+
+model Tool {
+  id               String       @id @default(uuid())
+  slug             String       @unique // "seo_auditor", "blog_writer", etc.
+  name             String       // "SEO Auditor"
+  description      String
+  category         ToolCategory
+  creditCost       Int          // Base credit cost to run
+  inputSchema      Json         // JSON Schema for valid inputs
+  outputSchema     Json         // JSON Schema for expected outputs
+  estimatedSeconds Int          @default(60)
+  isActive         Boolean      @default(true)
+  isFree           Boolean      @default(false) // Lead magnet tools
+  minPlan          Plan         @default(FREE)  // Minimum plan required
+  version          String       @default("1.0.0")
+  icon             String?      // Emoji or icon identifier
+  createdAt        DateTime     @default(now())
+
+  tasks            Task[]
+}
+
+enum ToolCategory {
+  SEO
+  CONTENT
+  SOCIAL
+  OUTREACH
+  DESIGN
+  RESEARCH
+  VOICE
+  ADMIN
+  WHATSAPP
+  INVOICING
+  ACCOUNTING
+  LINKEDIN
+}
+
+model Agent {
+  id        String    @id @default(uuid())
+  name      String    // "Reasoner", "Writer", "Critic", "Researcher"
+  role      AgentRole
+  model     String    // "deepseek-r1:8b", "llama3.1:8b", "gpt-4o-mini"
+  provider  String    // "ollama", "openai", "deepinfra"
+  config    Json?     // Temperature, max_tokens, system prompt
+  isActive  Boolean   @default(true)
+
+  taskSteps TaskStep[]
+}
+
+enum AgentRole {
+  MANAGER     // Orchestrates, delegates, decides
+  REASONER    // Deep thinking (DeepSeek-R1)
+  WRITER      // Content generation (Llama-3)
+  CRITIC      // Quality checking
+  RESEARCHER  // Web search + analysis
+  VISION      // Image/design analysis (LLaVA)
+  VOICE       // Speech processing (Whisper)
+}
+
+// ==================== TASKS & EXECUTION ====================
+
+model Task {
+  id            String     @id @default(uuid())
+  orgId         String
+  userId        String     // Who submitted
+  toolId        String     // Which tool was used
+  status        TaskStatus @default(QUEUED)
+  priority      Int        @default(5) // 1=highest, 10=lowest
+  inputData     Json       // User's input
+  outputData    Json?      // Final result
+  creditCost    Int        // Actual credits deducted
+  error        String?
+  retryCount    Int        @default(0)
+  maxRetries    Int        @default(3)
+  createdAt     DateTime   @default(now())
+  queuedAt      DateTime   @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  org           Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user          User                @relation(fields: [userId], references: [id])
+  tool          Tool                @relation(fields: [toolId], references: [id])
+  steps         TaskStep[]
+  creditTxns    CreditTransaction[]
+
+  @@index([orgId, status])
+  @@index([userId])
+  @@index([queuedAt])
+}
+
+enum TaskStatus {
+  QUEUED
+  DISPATCHED
+  PROCESSING
+  REVIEWING
+  COMPLETED
+  FAILED
+  CANCELLED
+  WAITING_GPU
+  WAITING_INPUT
+}
+
+model TaskStep {
+  id            String     @id @default(uuid())
+  taskId        String
+  agentId       String?
+  stepNumber    Int        @default(0)
+  action        String     // "RESEARCH", "DRAFT", "REVIEW", "PUBLISH", etc.
+  description   String?    // Human-readable step description
+  status        StepStatus @default(PENDING)
+  inputData     Json?
+  outputData    Json?
+  tokensUsed    Int?
+  latencyMs     Int?
+  modelUsed     String?
+  providerUsed  String?    // "ollama", "openai", "deepinfra"
+  errorMessage  String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  task          Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  agent         Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, stepNumber])
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+  RETRYING
+}
+
+// ==================== ASSETS & CONTENT ====================
+
+model Asset {
+  id        String    @id @default(uuid())
+  orgId     String
+  type      AssetType
+  name      String
+  url       String?   // Cloudflare R2 URL
+  content   String?   // Text content (for brand voice docs)
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, type])
+}
+
+enum AssetType {
+  LOGO
+  BRAND_GUIDE
+  BLOG_POST
+  SOCIAL_POST
+  IMAGE
+  DOCUMENT
+  VOICE_SAMPLE
+  INVOICE_PDF
+  RECEIPT_PDF
+}
+
+// ==================== VECTOR EMBEDDINGS (pgvector) ====================
+
+model Embedding {
+  id          String                       @id @default(uuid())
+  orgId       String
+  contentType String                       // "blog_draft", "brand_voice", "correction", "research"
+  content     String                       // The actual text chunk
+  embedding   Unsupported("vector(768)")   // nomic-embed-text = 768 dimensions
+  metadata    Json?                        // { "source_task_id": "...", "correction_type": "tone_wrong" }
+  score       Float?                       // Performance score
+  createdAt   DateTime                     @default(now())
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, contentType])
+}
+
+// ==================== SHADOW MANAGER (Proactive Monitoring) ====================
+
+model ClientHealthScore {
+  id              String   @id @default(uuid())
+  orgId           String
+  overallScore    Int      // 0-100 composite score
+  uptimeScore     Int?
+  speedScore      Int?
+  seoScore        Int?
+  contentScore    Int?
+  reviewScore     Int?
+  socialScore     Int?
+  leadScore       Int?
+  alertTriggered  Boolean  @default(false)
+  alertMessage    String?
+  measuredAt      DateTime @default(now())
+
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, measuredAt])
+}
+
+// ==================== WHATSAPP INTEGRATION ====================
+
+model WhatsAppAccount {
+  id              String    @id @default(uuid())
+  orgId           String
+  wabaId          String    @unique // WhatsApp Business Account ID
+  phoneNumberId   String    @unique // Meta phone number ID
+  phoneNumber     String            // Display phone number
+  displayName     String
+  accessToken     String            // Encrypted Meta access token
+  webhookSecret   String            // Webhook verification token
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  org             Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  messages        WhatsAppMessage[]
+  templates       WhatsAppTemplate[]
+
+  @@index([orgId])
+}
+
+model WhatsAppMessage {
+  id              String           @id @default(uuid())
+  accountId       String
+  orgId           String
+  direction       MessageDirection
+  fromNumber      String           // Sender phone
+  toNumber        String?          // Recipient phone (null for inbound)
+  contactPhone    String?          // Friendly alias for contact
+  contactName     String?          // Contact display name
+  type            String           // text, image, template, interactive
+  content         Json             // Message body/payload
+  status          String           @default("sent") // sent, delivered, read, failed
+  waMessageId     String?          @unique // Meta's message ID
+  rawPayload      Json?            // Full webhook payload for debugging
+  createdAt       DateTime         @default(now())
+
+  account         WhatsAppAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  org             Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, createdAt])
+  @@index([orgId])
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+model WhatsAppTemplate {
+  id              String          @id @default(uuid())
+  accountId       String
+  name            String
+  language        String          @default("en")
+  category        String          // MARKETING, UTILITY, AUTHENTICATION
+  status          String          @default("PENDING") // APPROVED, REJECTED, PENDING
+  components      Json            // Header, body, footer, buttons
+  createdAt       DateTime        @default(now())
+
+  account         WhatsAppAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+// ==================== INVOICES & ACCOUNTING ====================
+
+model Invoice {
+  id              String        @id @default(uuid())
+  orgId           String
+  invoiceNumber   String        @unique // INV-2026-0001
+  clientName      String
+  clientEmail     String?
+  items           Json          // [{ description, quantity, rate, amount }]
+  subtotal        Float
+  tax             Float         @default(0)
+  total           Float
+  currency        String        @default("USD")
+  status          InvoiceStatus @default(DRAFT)
+  dueDate         DateTime?
+  paidAt          DateTime?
+  pdfUrl          String?       // R2 URL to generated PDF
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  org             Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, status])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Expense {
+  id              String       @id @default(uuid())
+  orgId           String
+  category        String       // hosting, tools, marketing, salary, misc
+  description     String
+  amount          Float
+  currency        String       @default("USD")
+  date            DateTime
+  receiptUrl      String?      // R2 URL to receipt image/PDF
+  createdAt       DateTime     @default(now())
+
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, date])
+}
+
+// ==================== SOCIAL MEDIA ====================
+
+model SocialAccount {
+  id              String         @id @default(uuid())
+  orgId           String
+  platform        SocialPlatform
+  accountId       String         // Platform-specific account ID
+  accountName     String
+  accessToken     String         // Encrypted
+  refreshToken    String?        // Encrypted
+  tokenExpiresAt  DateTime?
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+
+  org             Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  posts           SocialPost[]
+
+  @@index([orgId])
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TWITTER
+}
+
+model SocialPost {
+  id              String      @id @default(uuid())
+  accountId       String
+  content         String
+  mediaUrls       String[]    // Array of image/video URLs
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  status          PostStatus  @default(DRAFT)
+  platformPostId  String?     // ID from the platform after publishing
+  analytics       Json?       // likes, shares, comments, reach
+  createdAt       DateTime    @default(now())
+
+  account         SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, status])
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+}
+
+// ==================== API KEYS (Client Programmatic Access) ====================
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  orgId       String
+  hashedKey    String   @unique // bcrypt hash of the key
+  keyPrefix   String   // First 8 chars: "wn_live_ab12..."
+  name        String   // "Production Key", "Test Key"
+  permissions String[] // ["tools.execute", "tasks.read", "credits.read"]
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+}
+
+// ==================== AUDIT LOG ====================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?  // FK to User if actor is a user
+  actorId     String?  // User ID, "SYSTEM", or "AI_BRAIN"
+  actorType   String   // "user", "admin", "ai_brain", "system"
+  action      String   // "create_client", "adjust_credits", "manual_payment"
+  resource    String   // "organization", "invoice", "task", etc.
+  resourceId  String?
+  metadata    Json?    // Additional context
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([resource, resourceId])
+  @@index([userId])
+}
+
+// ==================== SIGNAL ROOM ====================
+
+model ClientRoom {
+  id             String   @id @default(uuid())
+  orgId          String
+  name           String
+  website        String?
+  industry       String?
+  goals          Json?
+  reportCadence  String   @default("weekly")
+  brandTone      Json?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  org            Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  signals        Signal[]
+  reports        ClientReport[]
+  actionItems    ActionItem[]
+
+  @@index([orgId])
+}
+
+model Signal {
+  id           String   @id @default(uuid())
+  orgId        String
+  clientRoomId String
+  source       String   // "manual", "gsc", "ga4", "pagespeed", etc.
+  title        String
+  value        Json     // Pasted metrics, text notes, etc.
+  periodStart  DateTime?
+  periodEnd    DateTime?
+  createdAt    DateTime @default(now())
+
+  clientRoom   ClientRoom @relation(fields: [clientRoomId], references: [id], onDelete: Cascade)
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([clientRoomId])
+}
+
+model ClientReport {
+  id           String   @id @default(uuid())
+  orgId        String
+  clientRoomId String
+  status       String   @default("DRAFT") // DRAFT, REVIEW, APPROVED, SENT
+  title        String
+  periodStart  DateTime
+  periodEnd    DateTime
+  narrative    Json     // Sections: { headline, executiveSummary, wins, concerns, workCompleted, recommendedActions, clientDecisionsNeeded, sourceConfidence, missingData }
+  sourceIds    String[] // IDs of signals used
+  sentAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clientRoom   ClientRoom @relation(fields: [clientRoomId], references: [id], onDelete: Cascade)
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  actionItems  ActionItem[]
+
+  @@index([orgId])
+  @@index([clientRoomId])
+}
+
+model ActionItem {
+  id           String   @id @default(uuid())
+  orgId        String
+  clientRoomId String
+  reportId     String?
+  title        String
+  description  String?
+  impact       String?  // "high", "medium", "low"
+  effort       String?  // "high", "medium", "low"
+  status       String   @default("PROPOSED") // PROPOSED, APPROVED, IN_PROGRESS, COMPLETED, CANCELLED
+  approval     String   @default("NOT_REQUIRED")
+  dueAt        DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clientRoom   ClientRoom @relation(fields: [clientRoomId], references: [id], onDelete: Cascade)
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  report       ClientReport? @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  @@index([orgId])
+  @@index([clientRoomId])
+  @@index([reportId])
+}
+
+// ==================== SCENE BRANCHING & REPOSITORIES ====================
+
+model SceneBranch {
+  id          String   @id @default(uuid())
+  orgId       String
+  name        String
+  description String?
+  parentId    String?
+  state       Json     // E.g. layout coordinates, component trees, room setup
+  isStale     Boolean  @default(false)
+  metadata    Json?    // E.g. wagers or notes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org         Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  parent      SceneBranch?  @relation("SceneBranchToSceneBranch", fields: [parentId], references: [id])
+  children    SceneBranch[] @relation("SceneBranchToSceneBranch")
+  proposals   Proposal[]
+  drawings    Drawing[]
+  renders     Render[]
+}
+
+model Proposal {
+  id            String   @id @default(uuid())
+  orgId         String
+  branchId      String
+  title         String
+  description   String?
+  changes       Json     // Changes to be applied to branch state
+  disposition   String   // "DETERMINISTIC", "SMALL_AI", "ADVANCED_AI"
+  wagerMetrics  Json?    // Wagers: expected ROI, profitability impact
+  verdictMetrics Json?   // Actual metrics after evaluation
+  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED, EVALUATED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  org           Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  branch        SceneBranch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  approvals     Approval[]
+}
+
+model Approval {
+  id          String   @id @default(uuid())
+  proposalId  String
+  approvedBy  String?  // user email / id / "AUTO_SYSTEM"
+  decision    String   // "APPROVED", "REJECTED"
+  comments    String?
+  createdAt   DateTime @default(now())
+
+  proposal    Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+}
+
+model Drawing {
+  id          String   @id @default(uuid())
+  orgId       String
+  branchId    String
+  name        String
+  canvasData  Json     // shape layers, objects, properties
+  isStale     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  branch      SceneBranch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  renders     Render[]
+}
+
+model Render {
+  id          String   @id @default(uuid())
+  orgId       String
+  branchId    String
+  drawingId   String?
+  url         String?  // R2 / image CDN
+  prompt      String
+  parameters  Json     // E.g. width, height, seed, steps
+  isStale     Boolean  @default(false)
+  status      String   @default("PENDING") // PENDING, RENDERING, COMPLETED, FAILED
+  createdAt   DateTime @default(now())
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  branch      SceneBranch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  drawing     Drawing?     @relation(fields: [drawingId], references: [id], onDelete: SetNull)
+}
+
+model StateDependency {
+  id          String   @id @default(uuid())
+  orgId       String
+  nodeType    String   // "scene_branch", "drawing", "render"
+  nodeId      String   // Target node ID
+  parentType  String   // Dependency parent type (e.g. "code_file", "obsidian_note")
+  parentId    String   // Dependency parent ID
+  parentHash  String   // Last known state hash of the parent
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([nodeId, parentId])
+}
+
+// ==================== OODA INGESTION & CAPTURE ====================
+
+model Ingestion {
+  id          String   @id @default(uuid())
+  orgId       String
+  source      String   // "email", "slack", "transcript", "youtube", "manual"
+  title       String
+  content     String
+  status      String   @default("UNPROCESSED") // UNPROCESSED, ROUTED, COMPLETED
+  disposition String?  // "DETERMINISTIC", "SMALL_AI", "ADVANCED_AI"
+  proposalId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+// ==================== HERMES TELEMETRY LOGS ====================
+
+model HermesLog {
+  id         String   @id @default(uuid())
+  orgId      String
+  agentName  String   // "Orchestrator", "Researcher", "Scribe", "Reach", "Dev"
+  action     String
+  status     String   // "SUCCESS", "FAILED", "RUNNING"
+  message    String
+  tokensUsed Int?
+  latencyMs  Int?
+  createdAt  DateTime @default(now())
+
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+

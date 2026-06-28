@@ -1,0 +1,46 @@
+{
+  "name": "webness-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Webness OS — Sovereign AI Agency Operating System",
+  "author": "Webness <admin@webness.in>",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:api": "pnpm --filter @webness/api dev",
+    "dev:brain": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/windows/Start-BrainApi.ps1",
+    "dev:worker": "pnpm --filter @webness/worker dev",
+    "dev:dashboard": "pnpm --filter @webness/dashboard dev",
+    "dev:admin": "pnpm --filter @webness/admin dev",
+    "build": "pnpm -r build",
+    "build:api": "pnpm --filter @webness/api build",
+    "build:worker": "pnpm --filter @webness/worker build",
+    "build:dashboard": "pnpm --filter @webness/dashboard build",
+    "build:admin": "pnpm --filter @webness/admin build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:generate": "pnpm --filter @webness/db generate",
+    "db:push": "pnpm --filter @webness/db push",
+    "db:migrate": "pnpm --filter @webness/db migrate",
+    "db:seed": "pnpm --filter @webness/db seed",
+    "db:studio": "pnpm --filter @webness/db studio",
+    "brain:health": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/windows/Test-BrainDaily.ps1",
+    "brain:models": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/windows/Pull-BrainModels.ps1",
+    "brain:startup": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/windows/Install-BrainStartupTasks.ps1",
+    "clean": "pnpm -r exec -- rm -rf dist node_modules .turbo",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "playwright": "^1.61.0",
+    "playwright-core": "^1.61.0"
+  }
+}
